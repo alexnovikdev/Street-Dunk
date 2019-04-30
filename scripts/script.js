@@ -62,6 +62,10 @@ function setup() {
         PIXI.loader.resources["/images/logo.png"].texture
     );
 
+    btn.interactive = true;
+
+    btn.on("pointerdown", onDown);
+
     app.stage.addChild(ball);
     app.stage.addChild(btn);
     app.stage.addChild(logo);
@@ -71,6 +75,14 @@ function setup() {
     onSizeChange();
 
     app.ticker.add(delta => gameLoop(delta));
+}
+
+function onDown() {
+    redirect();
+}
+
+function redirect() {
+    
 }
 
 function updateSettings() {
