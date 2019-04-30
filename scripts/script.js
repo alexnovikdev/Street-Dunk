@@ -27,6 +27,15 @@ let settings = {
     defaultHeight: 1136
 };
 
+let config = {
+    ballSpeed: 0,
+    ballScaleY : 0,
+    isBallDown: true,
+    ballStartY: 0,
+    ballEndY: 0,
+    ballFallDistance: 0
+};
+
 let ball = null;
 let btn = null;
 let logo = null;
@@ -60,6 +69,8 @@ function setup() {
     updateSettings();
 
     onSizeChange();
+
+    app.ticker.add(delta => gameLoop(delta));
 }
 
 function updateSettings() {
@@ -84,13 +95,23 @@ function updateSettings() {
 function onSizeChange() {
     if (ball !== undefined && ball !== null) {
         ball.scale.set(.5 * settings.scale);
+        config.ballScaleY = .5 * settings.scale;
+
         ball.anchor.set(.5, .5);
 
         if (settings.isLandscape) {
-            ball.position.set(settings.gameWidth * .3, settings.gameHeight * .5);
+            ball.position.set(settings.gameWidth * .3, settings.gameHeight * .3);
+
+            config.ballStartY = settings.gameHeight * .3;
+            config.ballEndY = settings.gameHeight * .7; 
         } else {
-            ball.position.set(settings.gameWidth * .5, settings.gameHeight * .5);
+            ball.position.set(settings.gameWidth * .5, settings.gameHeight * .4);
+
+            config.ballStartY = settings.gameHeight * .4;
+            config.ballEndY = settings.gameHeight * .65; 
         }
+
+        config.ballFallDistance = config.ballEndY - config.ballStartY;
     }
 
     if (btn !== undefined && btn !== null) {
@@ -112,6 +133,39 @@ function onSizeChange() {
             logo.position.set(app.renderer.view.width * .7, app.renderer.view.height * .4);
         } else {
             logo.position.set(app.renderer.view.width * .5, app.renderer.view.height * .2);
+        }
+    }
+}
+
+function gameLoop(delta) {
+    if (ball !== undefined && ball !== null) {
+        if (config.isBallDown) {
+            ball.y += config.ballSpeed + delta;
+
+            if (ball.y > config.ballEndY - config.ballFallDistance * .1) {
+                ball.scale.y -= 0.03;
+            }
+
+            if (ball.y >= config.ballEndY) {
+                config.isBallDown = false;
+            }
+
+            config.ballSpeed += config.ballFallDistance / 1000;
+        }
+
+        if (!config.isBallDown) {
+            ball.y -= config.ballSpeed + delta;
+
+            if (ball.scale.y < config.ballScaleY) {
+                ball.scale.y += 0.03;
+            }
+
+            if (ball.y <= config.ballStartY) {
+                config.ballSpeed = 0;
+                config.isBallDown = true;               
+            }
+
+            config.ballSpeed -= config.ballFallDistance / 1000;
         }
     }
 }
